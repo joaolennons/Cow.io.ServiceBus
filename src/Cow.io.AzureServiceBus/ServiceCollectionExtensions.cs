@@ -17,12 +17,25 @@ namespace Cow.io.AzureServiceBus
             foreach (var queue in configuration.Queues)
             {
                 var queueType = typeof(Queue<>).MakeGenericType(queue.Key);
-                var instance = Activator.CreateInstance(queueType, queue.Value);
-                services.AddSingleton(queueType, instance);
+                var queueInstance = Activator.CreateInstance(queueType, queue.Value);
+                services.AddSingleton(queueType, queueInstance);
             }
 
-            services.AddTransient(typeof(IAzureServiceQueue<>), typeof(AzureServiceQueue<>));
+            services.AddTransient(typeof(IAzureQueueListener<>), typeof(AzureQueueListener<>));
             services.AddTransient(typeof(IPublisher<>), typeof(AzureServiceBusPublisher<>));
+
+            var provider = services.BuildServiceProvider();
+
+            var listenerHandler = new AzureServiceBusListenerHandler(provider);
+
+            foreach (var queue in configuration.Queues)
+            {
+                var queueType = typeof(IAzureQueueListener<>).MakeGenericType(queue.Key);
+                var listenerInstance = provider.GetService(queueType);
+                listenerHandler.AddListener((IAzureQueueListener)listenerInstance);
+            }
+
+            services.AddSingleton(listenerHandler);
 
             return services;
         }

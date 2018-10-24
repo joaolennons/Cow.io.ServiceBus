@@ -8,9 +8,9 @@ namespace App.Controllers
     [ApiController]
     public class ValuesController : ControllerBase
     {
-        private readonly IPublisher<Message> _publisher;
+        private readonly IPublisher<MessageSaga> _publisher;
 
-        public ValuesController(IPublisher<Message> publisher)
+        public ValuesController(IPublisher<MessageSaga> publisher)
         {
             _publisher = publisher;
         }
@@ -22,13 +22,13 @@ namespace App.Controllers
         }
 
         [HttpPost]
-        public async Task Publish([FromBody] Message message)
+        public async Task Publish([FromBody] MessageSaga message)
         {
             await _publisher.Handle(message);
         }
     }
 
-    public class Message : IMessage
+    public class MessageSaga : Cow.io.ServiceBus.Queue.MessageBody
     {
         public string Text { get; set; }
     }

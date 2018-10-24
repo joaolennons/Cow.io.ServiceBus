@@ -2,7 +2,11 @@
 
 namespace Cow.io.AzureServiceBus
 {
-    internal interface IAzureServiceQueue<T>
+    internal interface IAzureQueueListener<T> : IAzureQueueListener
+    {
+    }
+
+    internal interface IAzureQueueListener
     {
         IQueueClient Client { get; }
     }
