@@ -21,7 +21,7 @@ namespace Cow.io.AzureServiceBus
             return this;
         }
 
-        public IQueueConfiguration Build()
+        internal IQueueConfiguration Build()
         {
             return _configuration;
         }
