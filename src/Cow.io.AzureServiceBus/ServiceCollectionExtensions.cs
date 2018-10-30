@@ -1,6 +1,6 @@
-﻿using Cow.io.ServiceBus.Queue;
+﻿using System;
+using Cow.io.ServiceBus.Queue;
 using Microsoft.Extensions.DependencyInjection;
-using System;
 
 namespace Cow.io.AzureServiceBus
 {
@@ -13,6 +13,7 @@ namespace Cow.io.AzureServiceBus
             var configuration = builder.Build();
 
             services.AddSingleton<IHasConnectionString>(configuration);
+            services.AddSingleton(configuration);
 
             foreach (var queue in configuration.Queues)
             {
@@ -23,19 +24,6 @@ namespace Cow.io.AzureServiceBus
 
             services.AddTransient(typeof(IAzureQueueListener<>), typeof(AzureQueueListener<>));
             services.AddTransient(typeof(IPublisher<>), typeof(AzureServiceBusPublisher<>));
-
-            var provider = services.BuildServiceProvider();
-
-            var listenerHandler = new AzureServiceBusListenerHandler(provider);
-
-            foreach (var queue in configuration.Queues)
-            {
-                var queueType = typeof(IAzureQueueListener<>).MakeGenericType(queue.Key);
-                var listenerInstance = provider.GetService(queueType);
-                listenerHandler.AddListener((IAzureQueueListener)listenerInstance);
-            }
-
-            services.AddSingleton(listenerHandler);
 
             return services;
         }
