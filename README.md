@@ -1,6 +1,6 @@
 #nuget
 > Install-Package Cow.io.ServiceBus -Version 1.0.0 -> abstractions <br />
-> Install-Package Cow.io.AzureServiceBus -Version 1.0.0 -> implementation
+> Install-Package Cow.io.AzureServiceBus -Version 1.0.1 -> implementation
 
 # Cow.io.ServiceBus
 Provides simple structure for publishing/subscribing messages through AzureServiceBus for .net core
