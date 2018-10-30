@@ -65,4 +65,16 @@ public class FooSubscriber : ISubscribe<PersonCreated>
 }
 ```
 
+2. On your startup.cs class add IApplicationBuilder UseAzureServiceBus middleware
+```
+public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory logger)
+{
+     ...       
+
+     app.UseAzureServiceBus();
+
+     ...
+}
+```
+
 That's it!
