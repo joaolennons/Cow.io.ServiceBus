@@ -47,6 +47,8 @@ namespace App
                 app.UseHsts();
             }
 
+            app.UseAzureServiceBus();
+
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
