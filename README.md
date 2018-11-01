@@ -1,6 +1,6 @@
 #nuget
 > Install-Package Cow.io.ServiceBus -Version 1.0.0 -> abstractions <br />
-> Install-Package Cow.io.AzureServiceBus -Version 1.0.0 -> implementation
+> Install-Package Cow.io.AzureServiceBus -Version 1.0.1 -> implementation
 
 # Cow.io.ServiceBus
 Provides simple structure for publishing/subscribing messages through AzureServiceBus for .net core
@@ -62,6 +62,18 @@ public class FooSubscriber : ISubscribe<PersonCreated>
     {
         await Task.FromResult("Hello from subscriber!");
     }
+}
+```
+
+2. On your startup.cs class add IApplicationBuilder UseAzureServiceBus middleware
+```
+public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory logger)
+{
+     ...       
+
+     app.UseAzureServiceBus();
+
+     ...
 }
 ```
 
