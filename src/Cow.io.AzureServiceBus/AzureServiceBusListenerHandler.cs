@@ -34,23 +34,36 @@ namespace Cow.io.AzureServiceBus
 
         private async Task DispatchPackage(Microsoft.Azure.ServiceBus.Message message, CancellationToken cancellation)
         {
-            var header = JsonConvert.DeserializeObject<Header>(message.Label);
-            var body = JsonConvert.DeserializeObject(Encoding.UTF8.GetString(message.Body), header.MessageType);
-
-            var subscribers = _provider.GetServices(typeof(ISubscribe<>).MakeGenericType(header.MessageType));
-            var listener = _services.FirstOrDefault(lst => typeof(IAzureQueueListener<>).MakeGenericType(header.MessageType).IsAssignableFrom(lst.GetType()));
-
-            foreach (var subscriber in subscribers)
+            try
             {
-                try
+                var header = JsonConvert.DeserializeObject<Header>(message.Label);
+                Console.WriteLine($"Message of type has been received:{message.Label}");
+                var body = JsonConvert.DeserializeObject(Encoding.UTF8.GetString(message.Body), header.MessageType);
+                Console.WriteLine($"With body:{body}");
+
+                var subscribers = _provider.GetServices(typeof(ISubscribe<>).MakeGenericType(header.MessageType));
+                var listener = _services.FirstOrDefault(lst => typeof(IAzureQueueListener<>).MakeGenericType(header.MessageType).IsAssignableFrom(lst.GetType()));
+
+                foreach (var subscriber in subscribers)
                 {
-                    await ((dynamic)subscriber).Handle((dynamic)body);
-                    await listener.Client.CompleteAsync(message.SystemProperties.LockToken);
+                    try
+                    {
+                        Console.WriteLine($"And will be sent to:{subscriber}");
+                        await ((dynamic)subscriber).Handle((dynamic)body);
+                        await listener.Client.CompleteAsync(message.SystemProperties.LockToken);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"An exception has occurred:{ex.Message}");
+                        await listener.Client.AbandonAsync(message.SystemProperties.LockToken);
+                        throw;
+                    }
                 }
-                catch (Exception)
-                {
-                    //ver o que fazer
-                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An exception has occurred:{ex.Message}");
+                throw;
             }
         }
 
