@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -37,9 +38,9 @@ namespace Cow.io.AzureServiceBus
             try
             {
                 var header = JsonConvert.DeserializeObject<Header>(message.Label);
-                Console.WriteLine($"Message of type has been received:{message.Label}");
+                Debug.WriteLine($"Message of type has been received:{message.Label}");
                 var body = JsonConvert.DeserializeObject(Encoding.UTF8.GetString(message.Body), header.MessageType);
-                Console.WriteLine($"With body:{body}");
+                Debug.WriteLine($"With body:{body}");
 
                 var subscribers = _provider.GetServices(typeof(ISubscribe<>).MakeGenericType(header.MessageType));
                 var listener = _services.FirstOrDefault(lst => typeof(IAzureQueueListener<>).MakeGenericType(header.MessageType).IsAssignableFrom(lst.GetType()));
@@ -48,13 +49,13 @@ namespace Cow.io.AzureServiceBus
                 {
                     try
                     {
-                        Console.WriteLine($"And will be sent to:{subscriber}");
+                        Debug.WriteLine($"And will be sent to:{subscriber}");
                         await ((dynamic)subscriber).Handle((dynamic)body);
                         await listener.Client.CompleteAsync(message.SystemProperties.LockToken);
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"An exception has occurred:{ex.Message}");
+                        Debug.WriteLine($"An exception has occurred:{ex.Message}");
                         await listener.Client.AbandonAsync(message.SystemProperties.LockToken);
                         throw;
                     }
@@ -62,7 +63,7 @@ namespace Cow.io.AzureServiceBus
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"An exception has occurred:{ex.Message}");
+                Debug.WriteLine($"An exception has occurred:{ex.Message}");
                 throw;
             }
         }
