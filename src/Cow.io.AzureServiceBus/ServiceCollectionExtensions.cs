@@ -6,9 +6,9 @@ namespace Cow.io.AzureServiceBus
 {
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection AddAzureServiceBusDependency(this IServiceCollection services, Action<IQueueConfigurationBuilder> options)
+        public static IServiceCollection AddAzureServiceBusDependency(this IServiceCollection services, Action<IServiceBusConfigurationBuilder> options)
         {
-            var builder = new QueueConfigurationBuilder();
+            var builder = new AzureServiceBusConfigurationBuilder();
             options.Invoke(builder);
             var configuration = builder.Build();
 
@@ -22,7 +22,17 @@ namespace Cow.io.AzureServiceBus
                 services.AddSingleton(queueType, queueInstance);
             }
 
+            foreach (var topic in configuration.Topics)
+            {
+                var topicType = typeof(Queue<>).MakeGenericType(topic.Key);
+                var topicInstance = Activator.CreateInstance(topicType, topic.Value);
+                services.AddSingleton(topicType, topicInstance);
+            }
+
             services.AddTransient(typeof(IAzureQueueListener<>), typeof(AzureQueueListener<>));
+            services.AddTransient(typeof(IAzureTopicListener<>), typeof(AzureTopicListener<>));
+            services.AddTransient(typeof(IAzureTopicWriter<>), typeof(AzureTopicWriter<>));
+            services.AddTransient(typeof(IPublisher<>), typeof(AzureServiceBusTopicPublisher<>));
             services.AddTransient(typeof(IPublisher<>), typeof(AzureServiceBusQueuePublisher<>));
 
             return services;
