@@ -1,4 +1,4 @@
-﻿namespace Cow.io.ServiceBus.Queue
+﻿namespace Cow.io.ServiceBus
 {
     public interface IQueueConfigurationBuilder
     {

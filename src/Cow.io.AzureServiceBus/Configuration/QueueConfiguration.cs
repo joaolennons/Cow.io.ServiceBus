@@ -1,4 +1,4 @@
-﻿using Cow.io.ServiceBus.Queue;
+﻿using Cow.io.ServiceBus;
 using System;
 using System.Collections.Generic;
 

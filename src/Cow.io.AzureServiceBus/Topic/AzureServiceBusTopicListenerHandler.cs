@@ -5,25 +5,25 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Cow.io.ServiceBus.Queue;
+using Cow.io.ServiceBus;
 using Microsoft.Azure.ServiceBus;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 
 namespace Cow.io.AzureServiceBus
 {
-    internal class AzureServiceBusListenerHandler : IDisposable
+    internal class AzureServiceBusTopicListenerHandler : IDisposable
     {
         private readonly IServiceProvider _provider;
-        private readonly IList<IAzureQueueListener> _services;
+        private readonly IList<IAzureTopicListener> _services;
 
-        public AzureServiceBusListenerHandler(IServiceProvider provider)
+        public AzureServiceBusTopicListenerHandler(IServiceProvider provider)
         {
             _provider = provider;
-            _services = new List<IAzureQueueListener>();
+            _services = new List<IAzureTopicListener>();
         }
 
-        public void AddListener(IAzureQueueListener subscriber)
+        public void AddListener(IAzureTopicListener subscriber)
         {
             subscriber.Client.RegisterMessageHandler(DispatchPackage, new MessageHandlerOptions(ExceptionReceivedHandler)
             {

@@ -1,5 +1,5 @@
 ﻿using System;
-using Cow.io.ServiceBus.Queue;
+using Cow.io.ServiceBus;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Cow.io.AzureServiceBus
@@ -23,7 +23,7 @@ namespace Cow.io.AzureServiceBus
             }
 
             services.AddTransient(typeof(IAzureQueueListener<>), typeof(AzureQueueListener<>));
-            services.AddTransient(typeof(IPublisher<>), typeof(AzureServiceBusPublisher<>));
+            services.AddTransient(typeof(IPublisher<>), typeof(AzureServiceBusQueuePublisher<>));
 
             return services;
         }

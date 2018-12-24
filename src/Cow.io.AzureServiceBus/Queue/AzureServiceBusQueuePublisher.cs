@@ -1,15 +1,12 @@
-﻿using Cow.io.ServiceBus.Queue;
-using Microsoft.Azure.ServiceBus;
-using Newtonsoft.Json;
-using System.Text;
+﻿using Cow.io.ServiceBus;
 using System.Threading.Tasks;
 
 namespace Cow.io.AzureServiceBus
 {
-    internal class AzureServiceBusPublisher<T> : IPublisher<T> where T : IMessage
+    internal class AzureServiceBusQueuePublisher<T> : IPublisher<T> where T : IMessage
     {
         private readonly IAzureQueueListener<T> _azureQueue;
-        public AzureServiceBusPublisher(IAzureQueueListener<T> azureQueue)
+        public AzureServiceBusQueuePublisher(IAzureQueueListener<T> azureQueue)
         {
             _azureQueue = azureQueue;
         }

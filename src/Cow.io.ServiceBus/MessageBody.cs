@@ -1,4 +1,4 @@
-﻿namespace Cow.io.ServiceBus.Queue
+﻿namespace Cow.io.ServiceBus
 {
     public abstract class MessageBody : IMessage
     {

@@ -1,4 +1,4 @@
-﻿using Cow.io.ServiceBus.Queue;
+﻿using Cow.io.ServiceBus;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -10,7 +10,7 @@ namespace Cow.io.AzureServiceBus
         {
             var configuration = app.ApplicationServices.GetService<IQueueConfiguration>();
 
-            var listenerHandler = new AzureServiceBusListenerHandler(app.ApplicationServices);
+            var listenerHandler = new AzureServiceBusQueueListenerHandler(app.ApplicationServices);
 
             foreach (var queue in configuration.Queues)
             {

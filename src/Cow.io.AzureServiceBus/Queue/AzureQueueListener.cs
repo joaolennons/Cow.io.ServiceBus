@@ -1,4 +1,4 @@
-﻿using Cow.io.ServiceBus.Queue;
+﻿using Cow.io.ServiceBus;
 using Microsoft.Azure.ServiceBus;
 
 namespace Cow.io.AzureServiceBus
