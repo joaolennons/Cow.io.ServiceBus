@@ -27,10 +27,9 @@ namespace App
                     c.SwaggerDoc("v1", new Info { Title = "Bandmaster Api", Version = "v1" });
                 })
                 .AddAzureServiceBusDependency(options =>
-            options
-            .WithConnectionString(Configuration.GetConnectionString("AzureServiceBus"))
-            .WithQueue<MessageSaga>("APP")
-            //.WithQueue<Message>($"{nameof(Message)}Queue")
+                options
+                .WithConnectionString(Configuration.GetConnectionString("AzureServiceBus"))
+                .WithTopic<MessageSaga>("Topic", "Subscription")
             );
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }

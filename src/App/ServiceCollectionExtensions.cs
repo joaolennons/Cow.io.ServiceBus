@@ -1,6 +1,6 @@
 ﻿using App.Controllers;
 using App.Subscribers;
-using Cow.io.ServiceBus.Queue;
+using Cow.io.ServiceBus;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace App

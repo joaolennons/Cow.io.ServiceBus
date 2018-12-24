@@ -1,5 +1,5 @@
 ﻿using App.Controllers;
-using Cow.io.ServiceBus.Queue;
+using Cow.io.ServiceBus;
 using System.Threading.Tasks;
 
 namespace App.Subscribers

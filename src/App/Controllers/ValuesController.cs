@@ -1,4 +1,4 @@
-﻿using Cow.io.ServiceBus.Queue;
+﻿using Cow.io.ServiceBus;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
@@ -28,7 +28,7 @@ namespace App.Controllers
         }
     }
 
-    public class MessageSaga : Cow.io.ServiceBus.Queue.MessageBody
+    public class MessageSaga : Cow.io.ServiceBus.MessageBody
     {
         public string Text { get; set; }
     }
