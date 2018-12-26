@@ -43,7 +43,7 @@ namespace Cow.io.AzureServiceBus
                 Debug.WriteLine($"With body:{body}");
 
                 var subscribers = _provider.GetServices(typeof(ISubscribe<>).MakeGenericType(header.MessageType));
-                var listener = _services.FirstOrDefault(lst => typeof(IAzureQueueListener<>).MakeGenericType(header.MessageType).IsAssignableFrom(lst.GetType()));
+                var listener = _services.FirstOrDefault(lst => typeof(IAzureTopicListener<>).MakeGenericType(header.MessageType).IsAssignableFrom(lst.GetType()));
 
                 foreach (var subscriber in subscribers)
                 {

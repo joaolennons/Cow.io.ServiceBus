@@ -29,7 +29,7 @@ namespace App
                 .AddAzureServiceBusDependency(options =>
                 options
                 .WithConnectionString(Configuration.GetConnectionString("AzureServiceBus"))
-                .WithTopic<MessageSaga>("Topic", "Subscription")
+                .WithTopic<MessageSaga>("topico1", "assinatura1")
             );
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }

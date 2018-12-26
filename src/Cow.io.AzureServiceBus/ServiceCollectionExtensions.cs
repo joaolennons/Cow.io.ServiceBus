@@ -24,8 +24,8 @@ namespace Cow.io.AzureServiceBus
 
             foreach (var topic in configuration.Topics)
             {
-                var topicType = typeof(Queue<>).MakeGenericType(topic.Key);
-                var topicInstance = Activator.CreateInstance(topicType, topic.Value);
+                var topicType = typeof(Topic<>).MakeGenericType(topic.Key);
+                var topicInstance = Activator.CreateInstance(topicType, topic.Value.Item1, topic.Value.Item2);
                 services.AddSingleton(topicType, topicInstance);
             }
 
