@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Cow.io.ServiceBus;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -29,12 +30,27 @@ namespace Cow.io.AzureServiceBus
                 services.AddSingleton(topicType, topicInstance);
             }
 
+            if (configuration.Queues.Any())
+                services.AddAzureServiceBusQueueDependency();
+
+            if (configuration.Topics.Any())
+                services.AddAzureServiceBusTopicDependency();
+
+            return services;
+        }
+
+        private static IServiceCollection AddAzureServiceBusQueueDependency(this IServiceCollection services)
+        {
             services.AddTransient(typeof(IAzureQueueListener<>), typeof(AzureQueueListener<>));
+            services.AddTransient(typeof(IPublisher<>), typeof(AzureServiceBusQueuePublisher<>));
+            return services;
+        }
+
+        private static IServiceCollection AddAzureServiceBusTopicDependency(this IServiceCollection services)
+        {
             services.AddTransient(typeof(IAzureTopicListener<>), typeof(AzureTopicListener<>));
             services.AddTransient(typeof(IAzureTopicWriter<>), typeof(AzureTopicWriter<>));
             services.AddTransient(typeof(IPublisher<>), typeof(AzureServiceBusTopicPublisher<>));
-            services.AddTransient(typeof(IPublisher<>), typeof(AzureServiceBusQueuePublisher<>));
-
             return services;
         }
     }
