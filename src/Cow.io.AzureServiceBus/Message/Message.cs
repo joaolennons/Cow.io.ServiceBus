@@ -1,6 +1,7 @@
-﻿using Cow.io.ServiceBus;
-using Newtonsoft.Json;
+﻿using System;
 using System.Text;
+using Cow.io.ServiceBus;
+using Newtonsoft.Json;
 
 namespace Cow.io.AzureServiceBus
 {
@@ -8,6 +9,7 @@ namespace Cow.io.AzureServiceBus
     {
         public Message(IMessage body)
         {
+            this.MessageId = Guid.NewGuid().ToString();
             this.Body = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(body));
             this.Label = JsonConvert.SerializeObject(new Header
             {

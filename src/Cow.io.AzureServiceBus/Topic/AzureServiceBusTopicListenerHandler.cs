@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -8,12 +7,14 @@ using System.Threading.Tasks;
 using Cow.io.ServiceBus;
 using Microsoft.Azure.ServiceBus;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
 namespace Cow.io.AzureServiceBus
 {
     internal class AzureServiceBusTopicListenerHandler : IDisposable
     {
+        private readonly ILogger<IMessage> _logger;
         private readonly IServiceProvider _provider;
         private readonly IList<IAzureTopicListener> _services;
 
@@ -21,6 +22,7 @@ namespace Cow.io.AzureServiceBus
         {
             _provider = provider;
             _services = new List<IAzureTopicListener>();
+            _logger = provider.GetService<ILogger<IMessage>>();
         }
 
         public void AddListener(IAzureTopicListener subscriber)
@@ -38,9 +40,10 @@ namespace Cow.io.AzureServiceBus
             try
             {
                 var header = JsonConvert.DeserializeObject<Header>(message.Label);
-                Debug.WriteLine($"Message of type has been received:{message.Label}");
+                _logger.LogInformation($"[{message.MessageId}] Message received");
+                _logger.LogInformation($"[{message.MessageId}] Wity type: {message.Label}");
                 var body = JsonConvert.DeserializeObject(Encoding.UTF8.GetString(message.Body), header.MessageType);
-                Debug.WriteLine($"With body:{body}");
+                _logger.LogInformation($"[{message.MessageId}] With body: {Encoding.UTF8.GetString(message.Body)}");
 
                 var subscribers = _provider.GetServices(typeof(ISubscribe<>).MakeGenericType(header.MessageType));
                 var listener = _services.FirstOrDefault(lst => typeof(IAzureTopicListener<>).MakeGenericType(header.MessageType).IsAssignableFrom(lst.GetType()));
@@ -49,21 +52,23 @@ namespace Cow.io.AzureServiceBus
                 {
                     try
                     {
-                        Debug.WriteLine($"And will be sent to:{subscriber}");
+                        _logger.LogInformation($"[{message.MessageId}] Will be sent to: {subscriber}");
                         await ((dynamic)subscriber).Handle((dynamic)body);
                         await listener.Client.CompleteAsync(message.SystemProperties.LockToken);
+                        _logger.LogInformation($"[{message.MessageId}] Was completed with token: {message.SystemProperties.LockToken}");
                     }
                     catch (Exception ex)
                     {
-                        Debug.WriteLine($"An exception has occurred:{ex.Message}");
+                        _logger.LogInformation($"[{message.MessageId}] An exception has occurred:{ex.Message}");
                         await listener.Client.AbandonAsync(message.SystemProperties.LockToken);
+                        _logger.LogInformation($"[{message.MessageId}] Was abondoned with token:{message.SystemProperties.LockToken}");
                         throw;
                     }
                 }
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"An exception has occurred:{ex.Message}");
+                _logger.LogInformation($"[{message.MessageId}] An exception has occurred:{ex.Message}");
                 throw;
             }
         }
