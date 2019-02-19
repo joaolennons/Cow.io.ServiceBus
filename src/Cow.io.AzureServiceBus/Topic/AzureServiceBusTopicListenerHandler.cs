@@ -42,11 +42,12 @@ namespace Cow.io.AzureServiceBus
                 var header = JsonConvert.DeserializeObject<Header>(message.Label);
                 _logger.LogInformation($"[{message.MessageId}] Message received");
                 _logger.LogInformation($"[{message.MessageId}] Wity type: {message.Label}");
-                var body = JsonConvert.DeserializeObject(Encoding.UTF8.GetString(message.Body), header.MessageType);
-                _logger.LogInformation($"[{message.MessageId}] With body: {Encoding.UTF8.GetString(message.Body)}");
 
                 var subscribers = _provider.GetServices(typeof(ISubscribe<>).MakeGenericType(header.MessageType));
                 var listener = _services.FirstOrDefault(lst => typeof(IAzureTopicListener<>).MakeGenericType(header.MessageType).IsAssignableFrom(lst.GetType()));
+                var serializer = _provider.GetService(typeof(IServiceBusSerializer<>).MakeGenericType(header.MessageType));
+                var body = serializer == null ? JsonConvert.DeserializeObject(Encoding.UTF8.GetString(message.Body), header.MessageType) : ((dynamic)serializer).Deserialize(Encoding.UTF8.GetString(message.Body));
+                _logger.LogInformation($"[{message.MessageId}] With body: {Encoding.UTF8.GetString(message.Body)}");
 
                 foreach (var subscriber in subscribers)
                 {
