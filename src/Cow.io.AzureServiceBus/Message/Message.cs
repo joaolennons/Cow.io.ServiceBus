@@ -13,7 +13,7 @@ namespace Cow.io.AzureServiceBus
             this.Body = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(body));
             this.Label = JsonConvert.SerializeObject(new Header
             {
-                MessageType = body.GetType()
+                MessageType = body.GetType().FullName
             });
         }
     }

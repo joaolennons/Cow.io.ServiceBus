@@ -15,11 +15,13 @@ namespace Cow.io.AzureServiceBus
     internal class AzureServiceBusQueueListenerHandler : IDisposable
     {
         private readonly IServiceProvider _provider;
+        private readonly IServiceCollection _serviceCollection;
         private readonly IList<IAzureQueueListener> _services;
 
-        public AzureServiceBusQueueListenerHandler(IServiceProvider provider)
+        public AzureServiceBusQueueListenerHandler(IServiceProvider provider, IServiceCollection services)
         {
             _provider = provider;
+            _serviceCollection = services;
             _services = new List<IAzureQueueListener>();
         }
 
@@ -39,11 +41,22 @@ namespace Cow.io.AzureServiceBus
             {
                 var header = JsonConvert.DeserializeObject<Header>(message.Label);
                 Debug.WriteLine($"Message of type has been received:{message.Label}");
-                var body = JsonConvert.DeserializeObject(Encoding.UTF8.GetString(message.Body), header.MessageType);
+
+                var types =
+                   from descriptor in _serviceCollection
+                   let serviceType = descriptor.ServiceType
+                   where serviceType.IsGenericType
+                   where serviceType.GetGenericTypeDefinition() == typeof(ISubscribe<>)
+                   let optionType = serviceType.GetGenericArguments()[0]
+                   select optionType;
+
+                var messageType = types.FirstOrDefault(o => o.FullName == header.MessageType);
+
+                var body = JsonConvert.DeserializeObject(Encoding.UTF8.GetString(message.Body), messageType);
                 Debug.WriteLine($"With body:{body}");
 
-                var subscribers = _provider.GetServices(typeof(ISubscribe<>).MakeGenericType(header.MessageType));
-                var listener = _services.FirstOrDefault(lst => typeof(IAzureQueueListener<>).MakeGenericType(header.MessageType).IsAssignableFrom(lst.GetType()));
+                var subscribers = _provider.GetServices(typeof(ISubscribe<>).MakeGenericType(messageType));
+                var listener = _services.FirstOrDefault(lst => typeof(IAzureQueueListener<>).MakeGenericType(messageType).IsAssignableFrom(lst.GetType()));
 
                 foreach (var subscriber in subscribers)
                 {

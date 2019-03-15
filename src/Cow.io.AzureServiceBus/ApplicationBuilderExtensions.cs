@@ -6,12 +6,12 @@ namespace Cow.io.AzureServiceBus
 {
     public static class ApplicationBuilderExtensions
     {
-        public static void UseAzureServiceBus(this IApplicationBuilder app)
+        public static void UseAzureServiceBus(this IApplicationBuilder app, IServiceCollection services)
         {
             var configuration = app.ApplicationServices.GetService<IServiceBusConfiguration>();
 
-            var queueListenerHandler = new AzureServiceBusQueueListenerHandler(app.ApplicationServices);
-            var topicListenerHandler = new AzureServiceBusTopicListenerHandler(app.ApplicationServices);
+            var queueListenerHandler = new AzureServiceBusQueueListenerHandler(app.ApplicationServices, services);
+            var topicListenerHandler = new AzureServiceBusTopicListenerHandler(app.ApplicationServices, services);
 
             foreach (var queue in configuration.Queues)
             {

@@ -16,11 +16,13 @@ namespace Cow.io.AzureServiceBus
     {
         private readonly ILogger<IMessage> _logger;
         private readonly IServiceProvider _provider;
+        private readonly IServiceCollection _serviceCollection;
         private readonly IList<IAzureTopicListener> _services;
 
-        public AzureServiceBusTopicListenerHandler(IServiceProvider provider)
+        public AzureServiceBusTopicListenerHandler(IServiceProvider provider, IServiceCollection services)
         {
             _provider = provider;
+            _serviceCollection = services;
             _services = new List<IAzureTopicListener>();
             _logger = provider.GetService<ILogger<IMessage>>();
         }
@@ -43,10 +45,20 @@ namespace Cow.io.AzureServiceBus
                 _logger.LogInformation($"[{message.MessageId}] Message received");
                 _logger.LogInformation($"[{message.MessageId}] Wity type: {message.Label}");
 
-                var subscribers = _provider.GetServices(typeof(ISubscribe<>).MakeGenericType(header.MessageType));
-                var listener = _services.FirstOrDefault(lst => typeof(IAzureTopicListener<>).MakeGenericType(header.MessageType).IsAssignableFrom(lst.GetType()));
-                var serializer = _provider.GetService(typeof(IServiceBusSerializer<>).MakeGenericType(header.MessageType));
-                var body = serializer == null ? JsonConvert.DeserializeObject(Encoding.UTF8.GetString(message.Body), header.MessageType) : ((dynamic)serializer).Deserialize(Encoding.UTF8.GetString(message.Body));
+                var types =
+                    from descriptor in _serviceCollection
+                    let serviceType = descriptor.ServiceType
+                    where serviceType.IsGenericType
+                    where serviceType.GetGenericTypeDefinition() == typeof(ISubscribe<>)
+                    let optionType = serviceType.GetGenericArguments()[0]
+                    select optionType;
+
+                var messageType = types.FirstOrDefault(o => o.FullName == header.MessageType);
+
+                var subscribers = _provider.GetServices(typeof(ISubscribe<>).MakeGenericType(messageType));
+                var listener = _services.FirstOrDefault(lst => typeof(IAzureTopicListener<>).MakeGenericType(messageType).IsAssignableFrom(lst.GetType()));
+                var serializer = _provider.GetService(typeof(IServiceBusSerializer<>).MakeGenericType(messageType));
+                var body = serializer == null ? JsonConvert.DeserializeObject(Encoding.UTF8.GetString(message.Body), messageType) : ((dynamic)serializer).Deserialize(Encoding.UTF8.GetString(message.Body));
                 _logger.LogInformation($"[{message.MessageId}] With body: {Encoding.UTF8.GetString(message.Body)}");
 
                 foreach (var subscriber in subscribers)
