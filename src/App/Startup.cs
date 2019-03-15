@@ -11,6 +11,7 @@ namespace App
 {
     public class Startup
     {
+        private IServiceCollection _serviceCollection;
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -21,6 +22,7 @@ namespace App
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            _serviceCollection = services;
             services.AddApiDependency()
                 .AddSwaggerGen(c =>
                 {
@@ -46,7 +48,7 @@ namespace App
                 app.UseHsts();
             }
 
-            app.UseAzureServiceBus();
+            app.UseAzureServiceBus(_serviceCollection);
 
             app.UseSwagger();
             app.UseSwaggerUI(c =>
