@@ -22,6 +22,8 @@ namespace Cow.io.AzureServiceBus
 
             foreach (var topic in configuration.Topics)
             {
+                if (topic.Value.Item2 == null)
+                    continue;
                 var topicType = typeof(IAzureTopicListener<>).MakeGenericType(topic.Key);
                 var listenerInstance = app.ApplicationServices.GetService(topicType);
                 topicListenerHandler.AddListener((IAzureTopicListener)listenerInstance);
